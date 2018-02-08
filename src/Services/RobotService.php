@@ -20,6 +20,10 @@ class RobotService
      */
     private $logger;
 
+	/**
+	 * RobotService constructor.
+	 * @param array $params
+	 */
     public function __construct( $params = array() )
     {
         //print_r( $params );
@@ -44,17 +48,26 @@ class RobotService
 
     }
 
+	/**
+	 * @return RobotService
+	 */
     public static function get()
 	{
 		$object = new RobotService();
 		return $object;
 	}
 
-    public function setLogger( $logger )
+	/**
+	 * @param ConsoleLogger $logger
+	 */
+    public function setLogger( ConsoleLogger $logger )
     {
         $this->logger = $logger;
     }
 
+	/**
+	 * @param $actions
+	 */
     public function performActions( $actions )
     {
         $this->robot = Robot::get( $this->logger );
@@ -70,14 +83,13 @@ class RobotService
         }
     }
 
+	/**
+	 * @param Action $action
+	 */
     public function performAction( Action $action )
     {
-        //print_r( $action );
-        //$this->logger->debug( "Checking action " . $action->getAction() );
         if ( $this->actionIsValid( $action, $this->robot ) )
         {
-            //$this->logger->debug( "Peforming action " . $action->getAction() . ", " . $action->getFacing() . ", " . $action->getX() . ", " . $action->getY() );
-
             switch( $action->getAction() )
             {
                 case Action::PLACE:
@@ -118,18 +130,14 @@ class RobotService
             Action::FACING_WEST => 3
         );
 
-        //print_r($compass);
-        //$this->logger->debug( "changeDirection: " . $this->robot->getFacing() . ", " . $rotate );
         $value = null;
         if ( isset( $compass[ $facing ] ) )
         {
             $last = ( count( $compass ) - 1 );
             $value = $compass[ $facing ];
-            //$this->logger->debug( "changeDirection: " . $this->robot->getFacing() . ", " . $rotate . ", " . $value );
             if ( $rotate == Action::LEFT )
             {
                 $value = ( $value - 1 );
-                //$this->logger->debug( "left: " . $this->robot->getFacing() . ", " . $rotate . ", " . $value );
                 if ( $value < 0 )
                 {
                     $value = $last;
@@ -152,7 +160,6 @@ class RobotService
             {
                 if ( $v == $value )
                 {
-                    //$this->logger->debug( "changeDirection: " . $value . ", " . $k );
                     return $k;
                 }
             }
@@ -275,9 +282,4 @@ class RobotService
 
 		return $action;
 	}
-
-    public function test()
-    {
-        $this->logger->info("rows = " . $this->rows . ", columns " . $this->columns );
-    }
 }
