@@ -15,10 +15,9 @@ class Robot extends Entity
     {
     }
 
-    public static function get( ConsoleLogger $logger )
+    public static function get()
     {
         $object = new Robot();
-        $object->setLogger( $logger );
         return $object;
     }
 

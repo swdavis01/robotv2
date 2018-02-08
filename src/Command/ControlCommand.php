@@ -55,7 +55,8 @@ class ControlCommand extends BaseCommand
         $this->service->setLogger( $this->logger );
 
         //$this->service->performActions( $this->getTestActions() );
-		$this->service->performActions( $this->getActionsFromString( $this->data ) );
+		//$this->service->performActions( $this->getActionsFromString( $this->data ) );
+		$this->service->performActions( $this->getFullGridActions() );
     }
 
 	/**
@@ -69,12 +70,36 @@ class ControlCommand extends BaseCommand
 		$dataArray = explode( "|", $data );
 		foreach( $dataArray as $actionString )
 		{
-			$action = Action::get( $actionString, $this->logger );
+			$action = Action::get( $actionString );
 			if ( $action instanceof Action )
 			{
 				$result[] = $action;
 			}
 		}
+
+		return $result;
+	}
+
+	private function getFullGridActions()
+	{
+		$result = array();
+
+		$report = Action::get( Action::REPORT );
+		$action = Action::get( Action::PLACE . "," . Action::FACING_EAST . ",0,0" );
+		array_push( $result, $action, $report );
+
+		for( $i = 1; $i < RobotService::ROWS; $i++ )
+		{
+			for( $c = 1; $c < RobotService::COLUMNS; $c++ )
+			{
+				$action = Action::get( Action::MOVE );
+				array_push( $result, $action, $report );
+			}
+			$action = Action::get( Action::RIGHT );
+			array_push( $result, $action, $report );
+		}
+
+		//print_r( $result ); exit;
 
 		return $result;
 	}

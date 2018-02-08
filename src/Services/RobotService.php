@@ -8,8 +8,8 @@ use Robot\Entity\Robot;
 
 class RobotService
 {
-    private $rows = 5;
-    private $columns = 5;
+    const ROWS = 5;
+    const COLUMNS = 5;
 
     /**
      * @var Robot;
@@ -26,26 +26,6 @@ class RobotService
 	 */
     public function __construct( $params = array() )
     {
-        //print_r( $params );
-        // get values from config
-        if ( isset( $params['rows'] ) && is_int( $params['rows'] ) )
-        {
-            $rows = (int)$params['rows'];
-            if ( $rows > 0 )
-            {
-                $this->rows = $rows;
-            }
-        }
-
-        if ( isset( $params['columns'] ) && is_int( $params['columns'] ) )
-        {
-            $columns = (int)$params['columns'];
-            if ( $columns > 0 )
-            {
-                $this->columns = $columns;
-            }
-        }
-
     }
 
 	/**
@@ -70,7 +50,7 @@ class RobotService
 	 */
     public function performActions( $actions )
     {
-        $this->robot = Robot::get( $this->logger );
+        $this->robot = Robot::get();
         if ( is_array( $actions ) )
         {
             foreach( $actions as $action )
@@ -110,25 +90,36 @@ class RobotService
 				break;
 
                 case Action::REPORT:
-                    $this->logger->info( "Report: " . $this->robot->getX() . "," . $this->robot->getY() . "," . $this->robot->getFacing() );
+                    $this->logger->info( "Report: Row: " . $this->robot->getY() . ", Column: " . $this->robot->getX() . "," . $this->robot->getFacing() );
                 break;
             }
         }
     }
 
+	/**
+	 * @return array
+	 */
+    public static function getCompass()
+	{
+		$compass = array
+		(
+			Action::FACING_NORTH => 0,
+			Action::FACING_EAST => 1,
+			Action::FACING_SOUTH => 2,
+			Action::FACING_WEST => 3
+		);
+
+		return $compass;
+	}
+
     /**
      * @param $rotate Directtion to rotate (e.g. LEFT or RIGHT)
      * @param $facing Currently facing (e.g. NORTH)
+	 * return Either new facing direction or existing value
      */
     private function rotate( $rotate, $facing )
     {
-        $compass = array
-        (
-            Action::FACING_NORTH => 0,
-            Action::FACING_EAST => 1,
-            Action::FACING_SOUTH => 2,
-            Action::FACING_WEST => 3
-        );
+    	$compass = RobotService::getCompass();
 
         $value = null;
         if ( isset( $compass[ $facing ] ) )
@@ -226,12 +217,17 @@ class RobotService
      */
     private function placeIsValid( Action $action )
     {
-        if ( $action->getX() < 0 || $action->getX() > $this->rows )
+    	/*if ( !ctype_digit( $action->getX() ) || !ctype_digit( $action->getY() ) )
+		{
+			return false;
+		}*/
+
+        if ( $action->getX() < 0 || $action->getX() > RobotService::ROWS )
         {
             return false;
         }
 
-        if ( $action->getY() < 0 || $action->getY() > $this->columns )
+        if ( $action->getY() < 0 || $action->getY() > RobotService::COLUMNS )
         {
             return false;
         }
@@ -255,7 +251,7 @@ class RobotService
 	 */
 	private function getMoveAction( Robot $robot )
 	{
-		$action = Action::get( Action::MOVE, $this->logger );
+		$action = Action::get( Action::MOVE );
 		$action->setFacing( $robot->getFacing() );
 		$action->setX( $robot->getX() );
 		$action->setY( $robot->getY() );

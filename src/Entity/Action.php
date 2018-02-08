@@ -30,7 +30,7 @@ class Action extends Entity
      * @param $action Comma separated string (Action,Facing,X,Y)
      * @return Action|null
      */
-    public static function get( $action, ConsoleLogger $logger )
+    public static function get( $action )
     {
         $actionArray = explode( ",", $action );
         if ( count( $actionArray ) > 0 )
@@ -61,17 +61,15 @@ class Action extends Entity
             if ( $object->isValid() )
             {
                 //print_r( $object );
-                $object->setLogger( $logger );
                 return $object;
             }
         }
 
-        $logger->warning( "Ignoring action from string " . $action );
     }
 
     public function setX( $X )
     {
-        $this->X = (int)$X;
+        $this->X = $X;
         return $this;
     }
 
@@ -82,7 +80,7 @@ class Action extends Entity
 
     public function setY( $Y )
     {
-        $this->Y = (int)$Y;
+        $this->Y = $Y;
         return $this;
     }
 
