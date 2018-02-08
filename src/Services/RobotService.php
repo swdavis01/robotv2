@@ -8,8 +8,8 @@ use Robot\Entity\Robot;
 
 class RobotService
 {
-    const ROWS = 5;
-    const COLUMNS = 5;
+    const ROWS = 4;
+    const COLUMNS = 4;
 
     /**
      * @var Robot;
@@ -90,7 +90,7 @@ class RobotService
 				break;
 
                 case Action::REPORT:
-                    $this->logger->info( "Report: Row: " . $this->robot->getY() . ", Column: " . $this->robot->getX() . "," . $this->robot->getFacing() );
+                    $this->logger->info( "Report: Row: " . $this->robot->getY() . ", Column: " . $this->robot->getX() . ", " . $this->robot->getFacing() );
                 break;
             }
         }
@@ -128,18 +128,24 @@ class RobotService
             $value = $compass[ $facing ];
             if ( $rotate == Action::LEFT )
             {
+                // When moving left go up the compass
                 $value = ( $value - 1 );
                 if ( $value < 0 )
                 {
+                    // At the top, so go to the end
+                    // North to West
                     $value = $last;
                 }
             }
 
             if ( $rotate == Action::RIGHT )
             {
+                // When moving right go down the compass
                 $value = ( $value + 1 );
                 if ( $value > $last )
                 {
+                    // At the end, so go to the beginning
+                    // West to North
                     $value = 0;
                 }
             }
@@ -189,7 +195,7 @@ class RobotService
             }
             else
             {
-                $this->logger->warning( "Cannot place robot at X " . $action->getX() . ", Y " . $action->getY() );
+                $this->logger->warning( "Cannot place robot at Row " . $action->getY() . ", Column " . $action->getX() . " as it would exceed the boundary" );
             }
         }
 
@@ -202,7 +208,8 @@ class RobotService
 			}
 			else
 			{
-				$this->logger->warning( "Cannot move robot as X " . $robot->getX() . ", Y " . $robot->getY() . " is the edge of the table" );
+                $invalidAction = $this->getMoveAction( $robot );
+				$this->logger->warning( "Cannot move robot to Row " . $invalidAction->getY() . ", Column " . $invalidAction->getX() . " as it would exceed the boundary" );
 			}
 		}
 
