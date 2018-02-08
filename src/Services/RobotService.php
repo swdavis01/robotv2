@@ -213,7 +213,7 @@ class RobotService
 			}
 		}
 
-		$this->logger->warning( "Ignoring action " . $action->getAction() );
+		//$this->logger->warning( "Ignoring action " . $action->getAction() );
 
         return false;
     }

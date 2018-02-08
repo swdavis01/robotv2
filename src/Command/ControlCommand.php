@@ -58,7 +58,7 @@ class ControlCommand extends BaseCommand
         $this->service = RobotService::get();
         $this->service->setLogger( $this->logger );
 
-        $this->service->performActions( $this->getTestActions() );
+        //$this->service->performActions( $this->getTestActions() );
         if ( $this->data == ControlCommand::TRAVERSE_GRID_ACTION )
         {
             $this->service->performActions( $this->getFullGridActions() );
