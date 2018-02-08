@@ -2,8 +2,6 @@
 
 namespace Robot\Services;
 
-//use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-
 use Robot\Command\ConsoleLogger;
 use Robot\Entity\Action;
 use Robot\Entity\Robot;
@@ -76,7 +74,7 @@ class RobotService
     {
         //print_r( $action );
         //$this->logger->debug( "Checking action " . $action->getAction() );
-        if ( $this->actionIsValid( $action ) )
+        if ( $this->actionIsValid( $action, $this->robot ) )
         {
             //$this->logger->debug( "Peforming action " . $action->getAction() . ", " . $action->getFacing() . ", " . $action->getX() . ", " . $action->getY() );
 
@@ -93,6 +91,11 @@ class RobotService
                 case Action::RIGHT:
                     $this->robot->setFacing( $this->rotate( $action->getAction(), $this->robot->getFacing() ) );
                 break;
+
+				case Action::MOVE:
+					$moveAction = $action = $this->getMoveAction( $this->robot );
+					$this->robot->setXY( $moveAction->getX(), $moveAction->getY() );
+				break;
 
                 case Action::REPORT:
                     $this->logger->info( "Report: " . $this->robot->getX() . "," . $this->robot->getY() . "," . $this->robot->getFacing() );
@@ -162,7 +165,7 @@ class RobotService
      * @param Action $action
      * @return bool
      */
-    private function actionIsValid( Action $action )
+    private function actionIsValid( Action $action, Robot $robot )
     {
         if ( !$this->robot->getIsPlaced() )
         {
@@ -192,6 +195,21 @@ class RobotService
             }
         }
 
+		if ( $action->getAction() == Action::MOVE )
+		{
+			// check that action x,y falls within the bounds
+			if ( $this->moveIsValid( $robot ) )
+			{
+				return true;
+			}
+			else
+			{
+				$this->logger->warning( "Cannot move robot as X " . $robot->getX() . ", Y " . $robot->getY() . " is the edge of the table" );
+			}
+		}
+
+		$this->logger->warning( "Ignoring action " . $action->getAction() );
+
         return false;
     }
 
@@ -213,6 +231,50 @@ class RobotService
 
         return true;
     }
+
+	/**
+	 * @param Action $action
+	 * @return bool
+	 */
+	private function moveIsValid( Robot $robot )
+	{
+		$action = $this->getMoveAction( $robot );
+		return $this->placeIsValid( $action );
+	}
+
+	/**
+	 * @param Robot $robot
+	 * @return Action
+	 */
+	private function getMoveAction( Robot $robot )
+	{
+		$action = Action::get( Action::MOVE, $this->logger );
+		$action->setFacing( $robot->getFacing() );
+		$action->setX( $robot->getX() );
+		$action->setY( $robot->getY() );
+
+		switch( $robot->getFacing() )
+		{
+			case Action::FACING_NORTH:
+				// move up
+				$action->setY( $robot->getY() - 1 );
+			break;
+			case Action::FACING_SOUTH:
+				// move down
+				$action->setY( $robot->getY() + 1 );
+			break;
+			case Action::FACING_EAST:
+				// move right
+				$action->setX( $robot->getX() + 1 );
+			break;
+			case Action::FACING_WEST:
+				// move left
+				$action->setX( $robot->getX() - 1 );
+			break;
+		}
+
+		return $action;
+	}
 
     public function test()
     {

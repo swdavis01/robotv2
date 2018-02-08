@@ -44,6 +44,12 @@ class Robot extends Entity
         return $this->Y;
     }
 
+    public function setXY( $X, $Y )
+	{
+		$this->setX( $X );
+		$this->setY( $Y );
+	}
+
     public function setFacing( $Facing )
     {
         $this->Facing = $Facing;
